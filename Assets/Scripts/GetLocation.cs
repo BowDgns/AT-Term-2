@@ -5,33 +5,43 @@ public class GetLocation : MonoBehaviour
 {
     IEnumerator Start()
     {
-        // Check if the user has location services enabled
+        int maxWait = 20;
+        bool isUnityRemote = true;
+       
+
+        if (isUnityRemote)  // allowing time for unity remote to connect to the device
+        {
+            yield return new WaitForSeconds(5);
+        }
+
+        // check if location is enabled
         if (!Input.location.isEnabledByUser)
         {
-            Debug.Log("Location services not enabled");
+            Debug.Log("location not enabled");
             yield break;
         }
 
-        // Start location services
         Input.location.Start();
 
-        // Wait until the service initializes
-        int maxWait = 20;
+        if (isUnityRemote)
+        {
+            yield return new WaitForSeconds(5);
+        }
         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
         {
             yield return new WaitForSeconds(1);
             maxWait--;
         }
 
-        // Check if location service is working
+        // check location is working
         if (Input.location.status == LocationServiceStatus.Failed)
         {
-            Debug.Log("Unable to determine device location");
+            Debug.Log("unable to get location");
             yield break;
         }
 
-        // Retrieve and log coordinates
-        Debug.Log("Latitude: " + Input.location.lastData.latitude +
-                  ", Longitude: " + Input.location.lastData.longitude);
+        // return lagitute and longitude
+        Debug.Log("latitude: " + Input.location.lastData.latitude +
+                  ", longitude: " + Input.location.lastData.longitude);
     }
 }

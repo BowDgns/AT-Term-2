@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using System.IO;
 
 public class GetLocation : MonoBehaviour
 {
+    float radius_threashold = 0.01f;
     IEnumerator Start()
     {
         int maxWait = 20;
@@ -43,5 +45,41 @@ public class GetLocation : MonoBehaviour
         // return lagitute and longitude
         Debug.Log("latitude: " + Input.location.lastData.latitude +
                   ", longitude: " + Input.location.lastData.longitude);
+
+        nearWater(Input.location.lastData.latitude, Input.location.lastData.longitude);
+    }
+
+    void nearWater(float latitude, float longitude)
+    {
+
+        string path = Application.streamingAssetsPath + "/water_bodies.csv";
+
+        // read through coordinates in a csv file and compare them to device coordinates
+        if (File.Exists(path))
+        {
+            string[] lines = File.ReadAllLines(path);
+            foreach (string line in lines)
+            {
+                string[] parts = line.Split(',');
+                double water_lat = double.Parse(parts[0]);
+                double water_lon = double.Parse(parts[1]);
+                string body = parts[2];
+
+                if (checkRadius(latitude, longitude, water_lat, water_lon))
+                {
+                    Debug.Log("near a:" + parts[2]);
+                    return;
+                }
+            }
+        }
+        Debug.Log("not near water");
+
+    }
+
+    // hi comment
+    bool checkRadius(double lat1, double lon1, double lat2, double lon2)
+    {
+        double distance = Mathf.Sqrt(Mathf.Pow((float)(lat1 - lat2), 2) + Mathf.Pow((float)(lon1 - lon2), 2));
+        return distance < radius_threashold;
     }
 }

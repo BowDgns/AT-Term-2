@@ -4,7 +4,7 @@ using System.IO;
 
 public class GetLocation : MonoBehaviour
 {
-    float radius_threashold = 0.01f;
+    float radius_threashold = 0.001f;
     IEnumerator Start()
     {
         int maxWait = 20;
@@ -51,15 +51,16 @@ public class GetLocation : MonoBehaviour
 
     void nearWater(float latitude, float longitude)
     {
-
-        string path = Application.streamingAssetsPath + "/water_bodies.csv";
+        string path = Application.streamingAssetsPath + "/CityWater.csv";
 
         // read through coordinates in a csv file and compare them to device coordinates
         if (File.Exists(path))
         {
             string[] lines = File.ReadAllLines(path);
-            foreach (string line in lines)
+
+            for (int i = 1; i < lines.Length; i++)
             {
+                string line = lines[i];
                 string[] parts = line.Split(',');
                 double water_lat = double.Parse(parts[0]);
                 double water_lon = double.Parse(parts[1]);
@@ -67,13 +68,12 @@ public class GetLocation : MonoBehaviour
 
                 if (checkRadius(latitude, longitude, water_lat, water_lon))
                 {
-                    Debug.Log("near a:" + parts[2]);
+                    Debug.Log("near a: " + body);
                     return;
                 }
             }
         }
         Debug.Log("not near water");
-
     }
 
     // hi comment

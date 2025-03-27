@@ -6,9 +6,10 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float touchSensitivity = 0.1f;
+    public GameObject bobberPrefab; // The bobber prefab to instantiate
+    private GameObject currentBobber; // The current bobber placed in the world
 
     private CharacterController characterController;
-    private Vector3 velocity;
     private Transform cameraTransform;
     private float xRotation = 0f;
     private Vector2 touchDelta;
@@ -19,13 +20,14 @@ public class PlayerController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         cameraTransform = Camera.main.transform;
-        Cursor.lockState = CursorLockMode.Locked; // Locks the cursor to the game window
+        Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the game window
     }
 
     void Update()
     {
         MovePlayer();
         LookAround();
+        HandleScreenTap();
     }
 
     void MovePlayer()
@@ -65,6 +67,37 @@ public class PlayerController : MonoBehaviour
             else if (touch.phase == TouchPhase.Ended)
             {
                 isTouching = false;
+            }
+        }
+    }
+
+    void HandleScreenTap()
+    {
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            // If a bobber already exists, try to catch fish and remove the bobber.
+            if (currentBobber != null)
+            {
+                // Find the FishCatcher in the scene.
+                FishCatcher catcher = FindObjectOfType<FishCatcher>();
+                if (catcher != null)
+                {
+                    catcher.TryCatchFishAtBobber(currentBobber.transform);
+                }
+                // Despawn the bobber.
+                Destroy(currentBobber);
+                currentBobber = null;
+            }
+            else
+            {
+                // If no bobber exists, instantiate a new one at the tap position.
+                Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    currentBobber = Instantiate(bobberPrefab, hit.point, Quaternion.identity);
+                    // Optionally, set its tag if needed:
+                    currentBobber.tag = "Bobber";
+                }
             }
         }
     }

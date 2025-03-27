@@ -1,57 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // Import TextMeshPro
+using TMPro;
 
-public class FishingSystem : MonoBehaviour
+public class FishCatcher : MonoBehaviour
 {
-    public Transform fishingBobber; // The bobber that moves with the cast
-    public TextMeshProUGUI catchText; // UI to display the caught fish
-    public GameObject[] fishShadows; // The fish shadows in the water
+    public float catchRange = 0.5f;      // Range within which a fish can be caught relative to the bobber
+    public TMP_Text fishNameText;        // TextMeshPro text component to display the fish name
+    public string[] fishNames = new string[] { "Goldfish", "Bass", "Trout" };
 
-    private bool isFishing = false;
-    private bool fishBiting = false;
-    private string[] fishTypes = { "Bluegill", "Bass", "Carp" };
-    private Vector3 originalBobberPosition;
-
-    void Start()
+    // Called by PlayerController when a bobber exists and the player taps.
+    public void TryCatchFishAtBobber(Transform bobberTransform)
     {
-        originalBobberPosition = fishingBobber.position;
-        catchText.text = "";
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && !isFishing)
+        if (bobberTransform == null)
         {
-            StartCoroutine(CastLine());
+            Debug.LogWarning("Bobber transform is null!");
+            return;
         }
 
-        if (fishBiting && Input.GetKeyDown(KeyCode.Space))
+        // Find all fish in the scene with the "Fish" tag.
+        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag("Fish");
+        foreach (GameObject fish in fishObjects)
         {
-            CatchFish();
+            float distance = Vector3.Distance(bobberTransform.position, fish.transform.position);
+            if (distance <= catchRange)
+            {
+                CatchFish(fish);
+                break; // Only catch one fish per tap.
+            }
         }
     }
 
-    IEnumerator CastLine()
+    void CatchFish(GameObject fish)
     {
-        isFishing = true;
-        fishingBobber.position += new Vector3(0, -1, 0); // Simulate casting
-        yield return new WaitForSeconds(Random.Range(2f, 5f)); // Random wait time
-        fishBiting = true;
-        catchText.text = "A fish is biting! Press SPACE!";
-    }
+        // Select a random fish name from the array.
+        int randomIndex = Random.Range(0, fishNames.Length);
+        string randomFishName = fishNames[randomIndex];
 
-    void CatchFish()
-    {
-        if (!fishBiting) return;
+        // Display the fish name using TextMeshPro.
+        if (fishNameText != null)
+        {
+            fishNameText.text = "Caught a " + randomFishName + "!";
+        }
+        else
+        {
+            Debug.LogWarning("Fish Name TMP_Text reference is not set.");
+        }
 
-        string caughtFish = fishTypes[Random.Range(0, fishTypes.Length)];
-        catchText.text = "You caught a " + caughtFish + "!";
-
-        // Reset fishing state
-        fishingBobber.position = originalBobberPosition;
-        isFishing = false;
-        fishBiting = false;
+        // Remove the fish from the scene.
+        Destroy(fish);
     }
 }

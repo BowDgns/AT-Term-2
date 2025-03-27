@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\GetLocation.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Fish\Fish.cs" />
     <Compile Include="Assets\FishingSystem.cs" />
   </ItemGroup>
   <ItemGroup>

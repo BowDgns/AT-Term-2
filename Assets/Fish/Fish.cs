@@ -29,14 +29,10 @@ public class Fish : MonoBehaviour
         if (bobber != null && Vector3.Distance(transform.position, bobber.position) < detectionRange)
         {
             isFishAttracted = true;
+            swimSpeed = 0.7f;
             // Calculate a direction towards the bobber
             Vector3 targetDirection = (bobber.position - transform.position).normalized;
             swimDirection = Vector3.Lerp(swimDirection, targetDirection, turnSpeed * Time.deltaTime);
-        }
-        else if (!isFishAttracted)
-        {
-            // Optionally update random swim direction if not attracted
-            // (The coroutine already changes the direction periodically)
         }
 
         // Move the fish regardless of attraction state

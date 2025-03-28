@@ -3,8 +3,8 @@ using TMPro;
 
 public class FishCatcher : MonoBehaviour
 {
-    public float catchRange = 0.5f;      // Range within which a fish can be caught relative to the bobber
-    public TMP_Text fishNameText;        // TextMeshPro text component to display the fish name
+    public float catchRange = 0.5f;      
+    public TMP_Text fishNameText;        
     public string[] fishNames = new string[] { "Goldfish", "Bass", "Trout" };
 
     // Called by PlayerController when a bobber exists and the player taps.

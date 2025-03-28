@@ -1,25 +1,38 @@
 using UnityEngine;
 using System.Collections;
 using System.IO;
+using TMPro;
+
+[System.Serializable]
+public class SpawnMapping // to make the locations in the editor
+{
+    public string waterType;      
+    public string areaType;       
+    public Transform spawnPoint;  
+}
 
 public class GetLocation : MonoBehaviour
 {
-    float radius_threashold = 0.001f;
+    public Transform player;                // Assign your player Transform in the Inspector
+    public SpawnMapping[] spawnMappings;    // Assign mappings in the Inspector
+    float radius_threshold = 0.001f;         // Threshold for being "near" a water point
+
+    public TMP_Text area_name_text;
+
     IEnumerator Start()
     {
         int maxWait = 20;
-        bool isUnityRemote = true;
-       
+        bool isUnityRemote = true; // allowing time for Unity Remote to connect to the device
 
-        if (isUnityRemote)  // allowing time for unity remote to connect to the device
+        if (isUnityRemote)
         {
             yield return new WaitForSeconds(5);
         }
 
-        // check if location is enabled
+        // Check if location is enabled
         if (!Input.location.isEnabledByUser)
         {
-            Debug.Log("location not enabled");
+            Debug.Log("Location not enabled");
             yield break;
         }
 
@@ -35,16 +48,15 @@ public class GetLocation : MonoBehaviour
             maxWait--;
         }
 
-        // check location is working
+        // Check if location service is working
         if (Input.location.status == LocationServiceStatus.Failed)
         {
-            Debug.Log("unable to get location");
+            Debug.Log("Unable to get location");
             yield break;
         }
 
-        // return lagitute and longitude
-        Debug.Log("latitude: " + Input.location.lastData.latitude +
-                  ", longitude: " + Input.location.lastData.longitude);
+        Debug.Log("Latitude: " + Input.location.lastData.latitude +
+                  ", Longitude: " + Input.location.lastData.longitude);
 
         nearWater(Input.location.lastData.latitude, Input.location.lastData.longitude);
     }
@@ -53,33 +65,54 @@ public class GetLocation : MonoBehaviour
     {
         string path = Application.streamingAssetsPath + "/CityWater.csv";
 
-        // read through coordinates in a csv file and compare them to device coordinates
+        // Read through coordinates in a CSV file and compare them to device coordinates
         if (File.Exists(path))
         {
             string[] lines = File.ReadAllLines(path);
-
+            // Assuming the first line is a header
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i];
                 string[] parts = line.Split(',');
+                // Expected order: latitude, longitude, water body, water type, area type
                 double water_lat = double.Parse(parts[0]);
                 double water_lon = double.Parse(parts[1]);
-                string body = parts[2];
+                string water_body = parts[2];
+                string area_type = parts[3];
 
                 if (checkRadius(latitude, longitude, water_lat, water_lon))
                 {
-                    Debug.Log("near a: " + body);
+                    Debug.Log("water type: " + water_body + ", area: " + area_type);
+                    PlacePlayerAtSpawn(water_body, area_type);
                     return;
                 }
             }
         }
-        Debug.Log("not near water");
+        Debug.Log("Not near water");
     }
 
-    // hi comment
+    // Simple check using Euclidean distance (for small distances)
     bool checkRadius(double lat1, double lon1, double lat2, double lon2)
     {
         double distance = Mathf.Sqrt(Mathf.Pow((float)(lat1 - lat2), 2) + Mathf.Pow((float)(lon1 - lon2), 2));
-        return distance < radius_threashold;
+        return distance < radius_threshold;
+    }
+
+    void PlacePlayerAtSpawn(string waterType, string areaType)
+    {
+        foreach (SpawnMapping mapping in spawnMappings)
+        {
+            if (mapping.waterType == waterType && mapping.areaType == areaType)
+            {
+                Debug.Log("going to: " + mapping.spawnPoint.name);
+                if (player != null)
+                {
+                    player.transform.position = mapping.spawnPoint.position;
+                    area_name_text.text = "Area: " + mapping.areaType;
+                }
+                return;
+            }
+        }
+        Debug.Log("No spawn mapping found for Water Type: " + waterType + " and Area Type: " + areaType);
     }
 }

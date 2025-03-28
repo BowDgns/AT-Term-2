@@ -1826,7 +1826,7 @@ Transform:
   m_GameObject: {fileID: 447639240}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.90169907, y: -10.417936, z: -7.633726}
+  m_LocalPosition: {x: -0.90169907, y: -8, z: -7.633726}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3118,7 +3118,7 @@ Transform:
   m_GameObject: {fileID: 933449726}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 42.505722, y: 10.17, z: -3.3549156}
+  m_LocalPosition: {x: 42.505722, y: 12.2, z: -3.3549156}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4287,6 +4287,7 @@ GameObject:
   - component: {fileID: 1184860758}
   - component: {fileID: 1184860763}
   - component: {fileID: 1184860762}
+  - component: {fileID: 1184860764}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4378,7 +4379,7 @@ Transform:
   m_GameObject: {fileID: 1184860757}
   serializedVersion: 2
   m_LocalRotation: {x: 0.030779062, y: -0, z: -0, w: 0.9995262}
-  m_LocalPosition: {x: 140.95, y: 3.55, z: 44.73}
+  m_LocalPosition: {x: 37.1, y: 6.1, z: 22.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4426,6 +4427,33 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &1184860764
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184860757}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!4 &1193707725 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c0d14cf1fc2cd2d4a96dfc9b222136f5, type: 3}
@@ -8075,6 +8103,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9e1d446606214d45b8155e985fecce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1184860761}
+  spawnMappings:
+  - waterType: river
+    areaType: city
+    spawnPoint: {fileID: 933449727}
+  - waterType: pond
+    areaType: city
+    spawnPoint: {fileID: 447639241}
+  area_name_text: {fileID: 342885866}
 --- !u!4 &1962356456 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c0d14cf1fc2cd2d4a96dfc9b222136f5, type: 3}

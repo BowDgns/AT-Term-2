@@ -3,9 +3,17 @@ using TMPro;
 
 public class FishCatcher : MonoBehaviour
 {
-    public float catchRange = 0.5f;      
-    public TMP_Text fishNameText;        
-    public string[] fishNames = new string[] { "Goldfish", "Bass", "Trout" };
+    public float catchRange = 0.5f;
+    public TMP_Text fishNameText;
+
+    // Current water type that gets updated from GetLocation
+    [HideInInspector]
+    public string currentWaterType = "Default";
+
+    // Fish lists for different water types
+    public string[] pondFish = new string[] { "Goldfish", "Koi" };
+    public string[] riverFish = new string[] { "Bass", "Trout" };
+    public string[] defaultFish = new string[] { "Catfish", "Carp" };
 
     // Called by PlayerController when a bobber exists and the player taps.
     public void TryCatchFishAtBobber(Transform bobberTransform)
@@ -31,14 +39,12 @@ public class FishCatcher : MonoBehaviour
 
     void CatchFish(GameObject fish)
     {
-        // Select a random fish name from the array.
-        int randomIndex = Random.Range(0, fishNames.Length);
-        string randomFishName = fishNames[randomIndex];
+        string caughtFish = GetRandomFishByWaterType();
 
         // Display the fish name using TextMeshPro.
         if (fishNameText != null)
         {
-            fishNameText.text = "Caught a " + randomFishName + "!";
+            fishNameText.text = "Caught a " + caughtFish + "!";
         }
         else
         {
@@ -47,5 +53,28 @@ public class FishCatcher : MonoBehaviour
 
         // Remove the fish from the scene.
         Destroy(fish);
+    }
+
+    // Selects a random fish name based on the current water type
+    string GetRandomFishByWaterType()
+    {
+        string[] selectedFishList;
+
+        // Choose the fish list based on the water type
+        if (currentWaterType.ToLower().Contains("pond"))
+        {
+            selectedFishList = pondFish;
+        }
+        else if (currentWaterType.ToLower().Contains("river"))
+        {
+            selectedFishList = riverFish;
+        }
+        else
+        {
+            selectedFishList = defaultFish;
+        }
+
+        int randomIndex = Random.Range(0, selectedFishList.Length);
+        return selectedFishList[randomIndex];
     }
 }

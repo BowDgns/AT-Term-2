@@ -6,15 +6,16 @@ using TMPro;
 [System.Serializable]
 public class SpawnMapping // to make the locations in the editor
 {
-    public string waterType;      
-    public string areaType;       
-    public Transform spawnPoint;  
+    public string waterType;
+    public string areaType;
+    public Transform spawnPoint;
 }
 
 public class GetLocation : MonoBehaviour
 {
     public Transform player;                // Assign your player Transform in the Inspector
     public SpawnMapping[] spawnMappings;    // Assign mappings in the Inspector
+    public FishCatcher fishCatcher;         // Reference to the FishCatcher script
     float radius_threshold = 0.001f;         // Threshold for being "near" a water point
 
     public TMP_Text area_name_text;
@@ -109,6 +110,11 @@ public class GetLocation : MonoBehaviour
                 {
                     player.transform.position = mapping.spawnPoint.position;
                     area_name_text.text = "Area: " + mapping.areaType;
+                }
+                // Update the fish catcher with the current water type
+                if (fishCatcher != null)
+                {
+                    fishCatcher.currentWaterType = waterType;
                 }
                 return;
             }

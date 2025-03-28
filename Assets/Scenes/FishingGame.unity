@@ -224,10 +224,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   catchRange: 0.5
   fishNameText: {fileID: 1014017869}
-  fishNames:
+  currentWaterType: Default
+  pondFish:
   - Goldfish
+  - Koi
+  riverFish:
   - Bass
   - Trout
+  defaultFish:
+  - Catfish
+  - Carp
 --- !u!4 &54792050
 Transform:
   m_ObjectHideFlags: 0
@@ -8111,6 +8117,7 @@ MonoBehaviour:
   - waterType: pond
     areaType: city
     spawnPoint: {fileID: 447639241}
+  fishCatcher: {fileID: 54792049}
   area_name_text: {fileID: 342885866}
 --- !u!4 &1962356456 stripped
 Transform:

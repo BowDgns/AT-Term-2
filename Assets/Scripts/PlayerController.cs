@@ -1,25 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;  // Needed for UI touch detection
+using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float touchSensitivity = 0.1f;
-    public GameObject bobberPrefab; // Prefab for the bobber
-    private GameObject currentBobber; // Currently active bobber
+    public GameObject bobberPrefab; // Prefab for the bobber.
+    private GameObject currentBobber; // Currently active bobber.
 
     private CharacterController characterController;
     private Transform cameraTransform;
     private float xRotation = 0f;
 
-    // For touch handling on the game area (excluding UI)
+    // Touch handling for the game area.
     private Vector2 touchStartPos;
     private bool isSwiping = false;
-    public float swipeThreshold = 10f; // Minimum movement (in pixels) to consider as a swipe
+    public float swipeThreshold = 10f; // Minimum movement to consider as a swipe.
 
-    // Reference to the UI Joystick (assign in Inspector)
+    // Reference to the UI Joystick (assign in Inspector).
     public Joystick joystick;
     public float speed = 5f;
 
@@ -36,26 +36,20 @@ public class PlayerController : MonoBehaviour
         ProcessTouch();
     }
 
-    // Moves the player based on joystick input relative to the camera's facing direction.
+    // Moves the player based on joystick input relative to the camera’s facing direction.
     void MovePlayer()
     {
-        // Get the raw joystick input
         Vector3 input = new Vector3(joystick.Horizontal(), 0f, joystick.Vertical());
-
-        // Get camera's forward and right vectors
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
 
-        // Flatten the vectors to ignore any vertical component
+        // Flatten to ignore vertical components.
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
         right.Normalize();
 
-        // Combine the input with camera directions to get the movement direction
         Vector3 moveDirection = forward * input.z + right * input.x;
-
-        // Update the player's position
         transform.position += moveDirection * speed * Time.deltaTime;
     }
 
@@ -64,13 +58,12 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.touchCount > 0)
         {
-            // Process the first touch that's not over a UI element.
             foreach (Touch touch in Input.touches)
             {
                 if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
                     ProcessGameTouch(touch);
-                    break; // Only process one touch per frame.
+                    break;
                 }
             }
         }
@@ -86,7 +79,15 @@ public class PlayerController : MonoBehaviour
         }
         else if (touch.phase == TouchPhase.Moved)
         {
-            // Only process swipe for camera rotation if the touch started in the top 2/3 of the screen.
+            // Prevent camera rotation if a bobber animation is active.
+            if (currentBobber != null)
+            {
+                BobberController bc = currentBobber.GetComponent<BobberController>();
+                if (bc != null && bc.isAnimating)
+                    return;
+            }
+
+            // Process swipe for camera rotation only if the touch started in the top 2/3 of the screen.
             if (touchStartPos.y > Screen.height / 3f)
             {
                 if ((touch.position - touchStartPos).magnitude > swipeThreshold)
@@ -95,8 +96,6 @@ public class PlayerController : MonoBehaviour
                     Vector2 touchDelta = touch.deltaPosition;
                     float mouseX = touchDelta.x * touchSensitivity;
                     float mouseY = touchDelta.y * touchSensitivity;
-
-                    // Rotate the camera (pitch) and the player (yaw)
                     xRotation -= mouseY;
                     xRotation = Mathf.Clamp(xRotation, -90f, 90f);
                     cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
@@ -106,7 +105,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (touch.phase == TouchPhase.Ended)
         {
-            // If the finger did not move enough to count as a swipe, consider it a tap.
+            // If not swiping, treat as a tap.
             if (!isSwiping)
             {
                 PlaceOrCatchBobber(touch);
@@ -114,8 +113,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Places a new bobber at the tapped position or, if one already exists, attempts to catch fish.
-    // Bobber placement is processed from any point on the screen as long as the hit object is tagged "Water".
+    // Places a new bobber (or catches fish if one already exists).
     void PlaceOrCatchBobber(Touch touch)
     {
         if (currentBobber != null)
@@ -126,8 +124,18 @@ public class PlayerController : MonoBehaviour
             {
                 catcher.TryCatchFishAtBobber(currentBobber.transform);
             }
-            Destroy(currentBobber);
-            currentBobber = null;
+            // Capture the player's current position as the reel target.
+            Vector3 reelTarget = Camera.main.transform.position + new Vector3(0, 5.56f, 0);
+            BobberController bobberController = currentBobber.GetComponent<BobberController>();
+            if (bobberController != null)
+            {
+                StartCoroutine(ReelAndDestroyBobber(bobberController, reelTarget));
+            }
+            else
+            {
+                Destroy(currentBobber);
+                currentBobber = null;
+            }
         }
         else
         {
@@ -138,10 +146,26 @@ public class PlayerController : MonoBehaviour
                 // Only place the bobber if the hit object is tagged "Water".
                 if (hit.collider.CompareTag("Water"))
                 {
-                    currentBobber = Instantiate(bobberPrefab, hit.point, Quaternion.identity);
+                    // Instantiate the bobber at the player's position.
+                    currentBobber = Instantiate(bobberPrefab, transform.position, Quaternion.identity);
                     currentBobber.tag = "Bobber";
+
+                    BobberController bobberController = currentBobber.GetComponent<BobberController>();
+                    if (bobberController != null)
+                    {
+                        // Animate the bobber from the player to the water hit point.
+                        StartCoroutine(bobberController.ThrowBobber(transform.position, hit.point));
+                    }
                 }
             }
         }
+    }
+
+    // Reels the bobber in toward the captured player position and destroys it afterward.
+    IEnumerator ReelAndDestroyBobber(BobberController bobberController, Vector3 reelTarget)
+    {
+        yield return StartCoroutine(bobberController.ReelBobber(reelTarget));
+        Destroy(currentBobber);
+        currentBobber = null;
     }
 }

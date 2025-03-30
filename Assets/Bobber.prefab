@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2563446285265942861}
   - component: {fileID: 7684525446140503470}
   - component: {fileID: 8541104571761790615}
+  - component: {fileID: 4248919742171532598}
   m_Layer: 0
   m_Name: Bobber
   m_TagString: Bobber
@@ -135,3 +136,15 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &4248919742171532598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2301072949828178355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29da50fa75d103489c9b014b4198ab3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

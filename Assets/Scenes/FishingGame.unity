@@ -389,13 +389,13 @@ MonoBehaviour:
   - Mackerel
   - Sea Bass
   otherFish:
-  - Catfish
+  - Jumpyray
   - Carp
   fishSprites:
-  - fishName: Bass
-    fishSprite: {fileID: 21300000, guid: 052bc37a937871d408871da88b791cfb, type: 3}
-  - fishName: Blue Gill
-    fishSprite: {fileID: 21300000, guid: eb5ec996c93f7d145b74b8b3ad9ad3f6, type: 3}
+  - fishName: Goldfish
+    fishSprite: {fileID: 21300000, guid: 13913505ca9566541b99248dc44169d3, type: 3}
+  - fishName: Koi
+    fishSprite: {fileID: 21300000, guid: 3c94b9d7100b84c4ca82efc441c13f2f, type: 3}
 --- !u!4 &54792050
 Transform:
   m_ObjectHideFlags: 0
@@ -6987,14 +6987,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.64705884}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 1265a78a465ddfd468f5dace9bae5de6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -12904,7 +12904,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.8352941}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -19,6 +19,7 @@ public class GetLocation : MonoBehaviour
     float radius_threshold = 0.001f;         // Threshold for being "near" a water point
 
     public TMP_Text area_name_text;
+    public TMP_Text location_warning_text;
 
     IEnumerator Start()
     {
@@ -34,6 +35,7 @@ public class GetLocation : MonoBehaviour
         if (!Input.location.isEnabledByUser)
         {
             Debug.Log("Location not enabled");
+            location_warning_text.text = "Location not enabled.";
             yield break;
         }
 
@@ -53,6 +55,7 @@ public class GetLocation : MonoBehaviour
         if (Input.location.status == LocationServiceStatus.Failed)
         {
             Debug.Log("Unable to get location");
+            location_warning_text.text = "Can't get location.";
             yield break;
         }
 
@@ -90,6 +93,7 @@ public class GetLocation : MonoBehaviour
             }
         }
         Debug.Log("Not near water");
+        location_warning_text.text = "Not near water, to play go near any water body!";
     }
 
     // Simple check using Euclidean distance (for small distances)
@@ -109,7 +113,7 @@ public class GetLocation : MonoBehaviour
                 if (player != null)
                 {
                     player.transform.position = mapping.spawnPoint.position;
-                    area_name_text.text = "Area: " + mapping.areaType;
+                    area_name_text.text = "Area: " + mapping.areaType + ", " + mapping.waterType;
                 }
                 // Update the fish catcher with the current water type
                 if (fishCatcher != null)

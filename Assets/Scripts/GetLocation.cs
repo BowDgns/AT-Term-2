@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using TMPro;
+using UnityEngine.Networking;
 
 [System.Serializable]
 public class SpawnMapping // to make the locations in the editor
@@ -71,34 +72,64 @@ public class GetLocation : MonoBehaviour
         Debug.Log("Latitude: " + currentLatitude +
                   ", Longitude: " + currentLongitude);
 
-        nearWater(currentLatitude, currentLongitude);
+        // Start the coroutine to load and process the CSV file.
+        yield return StartCoroutine(LoadCityWater(currentLatitude, currentLongitude));
     }
 
-    void nearWater(float latitude, float longitude)
+    IEnumerator LoadCityWater(float latitude, float longitude)
     {
-        string path = Application.streamingAssetsPath + "/CityWater.csv";
+        string path = Path.Combine(Application.streamingAssetsPath, "CityWater.csv");
+        string csvText = "";
 
-        // Read through coordinates in a CSV file and compare them to device coordinates
-        if (File.Exists(path))
+        // On Android, the path will contain "://", so use UnityWebRequest
+        if (path.Contains("://"))
         {
-            string[] lines = File.ReadAllLines(path);
-            // Assuming the first line is a header
-            for (int i = 1; i < lines.Length; i++)
+            using (UnityWebRequest www = UnityWebRequest.Get(path))
             {
-                string line = lines[i];
-                string[] parts = line.Split(',');
-                // Expected order: latitude, longitude, water body, water type, area type
-                double water_lat = double.Parse(parts[0]);
-                double water_lon = double.Parse(parts[1]);
-                string water_body = parts[2];
-                string area_type = parts[3];
+                yield return www.SendWebRequest();
 
-                if (checkRadius(latitude, longitude, water_lat, water_lon))
+                if (www.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.Log("water type: " + water_body + ", area: " + area_type);
-                    PlacePlayerAtSpawn(water_body, area_type);
-                    return;
+                    Debug.LogError("Error loading CSV: " + www.error);
+                    location_warning_text.text = "Error loading water data.";
+                    yield break;
                 }
+                csvText = www.downloadHandler.text;
+            }
+        }
+        else
+        {
+            // For platforms that allow direct file access
+            csvText = File.ReadAllText(path);
+        }
+
+        // Split the CSV file into lines and process them.
+        string[] lines = csvText.Split(new char[] { '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+        // Assuming the first line is a header, so start at 1.
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            string[] parts = line.Split(',');
+            if (parts.Length < 4)
+            {
+                Debug.LogWarning("CSV format error on line " + i);
+                continue;
+            }
+
+            // Expected order: latitude, longitude, water body, water type, area type
+            double water_lat = double.Parse(parts[0]);
+            double water_lon = double.Parse(parts[1]);
+            string water_body = parts[2].Trim();  // Trim extra spaces/newlines
+            string area_type = parts[3].Trim();   // Trim extra spaces/newlines
+
+            Debug.Log($"Parsed CSV - water_body: '{water_body}', area_type: '{area_type}'");
+
+            if (checkRadius(latitude, longitude, water_lat, water_lon))
+            {
+                Debug.Log("Water type: " + water_body + ", Area: " + area_type);
+                PlacePlayerAtSpawn(water_body, area_type);
+                yield break;
             }
         }
         Debug.Log("Not near water");
@@ -118,7 +149,7 @@ public class GetLocation : MonoBehaviour
         {
             if (mapping.waterType == waterType && mapping.areaType == areaType)
             {
-                Debug.Log("going to: " + mapping.spawnPoint.name);
+                Debug.Log("Going to spawn point: " + mapping.spawnPoint.name);
                 if (player != null)
                 {
                     player.transform.position = mapping.spawnPoint.position;

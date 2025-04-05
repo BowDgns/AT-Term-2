@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 
 public class FishCatcher : MonoBehaviour
@@ -82,10 +83,10 @@ public class FishCatcher : MonoBehaviour
             Debug.LogWarning("Fish Name TMP_Text reference is not set.");
         }
 
-        // Set the fish image based on the caught fish.
+        // Retrieve the sprite for the caught fish.
+        Sprite spriteToDisplay = GetSpriteForFish(caughtFish);
         if (fishImage != null)
         {
-            Sprite spriteToDisplay = GetSpriteForFish(caughtFish);
             if (spriteToDisplay != null)
             {
                 fishImage.sprite = spriteToDisplay;
@@ -119,9 +120,15 @@ public class FishCatcher : MonoBehaviour
         }
 
         // Call the map script function to place a marker using the coordinates.
+        // Assumes that PlaceNewMarker returns a FishMarker component.
         if (mapManager != null)
         {
-            mapManager.PlaceNewMarker(lat, lon);
+            FishMarker marker = mapManager.PlaceNewMarker(lat, lon);
+            if (marker != null)
+            {
+                // Set marker data using the fish's name, sprite, and the current time.
+                marker.SetFishData(caughtFish, spriteToDisplay, DateTime.Now);
+            }
         }
         else
         {
@@ -154,7 +161,7 @@ public class FishCatcher : MonoBehaviour
             selectedFishList = otherFish;
         }
 
-        int randomIndex = Random.Range(0, selectedFishList.Length);
+        int randomIndex = UnityEngine.Random.Range(0, selectedFishList.Length);
         return selectedFishList[randomIndex];
     }
 

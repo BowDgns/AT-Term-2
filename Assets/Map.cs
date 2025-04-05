@@ -8,10 +8,10 @@ public class Map : MonoBehaviour
     public float mapLonLeft;             // Longitude at the top left corner
     public float mapLatBottom;           // Latitude at the bottom right corner
     public float mapLonRight;            // Longitude at the bottom right corner
-    public Button markerButtonPrefab;    // Your marker (UI Button) prefab
+    public Button markerButtonPrefab;    // Your marker (UI Button) prefab; should have a FishMarker component
 
-    // Places a new marker on the map based on device coordinates.
-    public void PlaceNewMarker(float deviceLat, float deviceLon)
+    // Places a new marker on the map based on device coordinates and returns its FishMarker component.
+    public FishMarker PlaceNewMarker(float deviceLat, float deviceLon)
     {
         // Convert device longitude into a normalized value (0 = left, 1 = right).
         float normalizedX = (deviceLon - mapLonLeft) / (mapLonRight - mapLonLeft);
@@ -30,5 +30,8 @@ public class Map : MonoBehaviour
         Button newMarker = Instantiate(markerButtonPrefab, mapImage);
         RectTransform markerRect = newMarker.GetComponent<RectTransform>();
         markerRect.anchoredPosition = new Vector2(posX, posY);
+
+        // Return the FishMarker component on the new marker (if it exists).
+        return newMarker.GetComponent<FishMarker>();
     }
 }

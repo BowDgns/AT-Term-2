@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.Collections; // Required for IEnumerator and WaitForSeconds
+using System.Collections;
 
 public class FishCatcher : MonoBehaviour
 {
@@ -28,7 +28,12 @@ public class FishCatcher : MonoBehaviour
     }
     public FishSpriteMapping[] fishSprites;
 
-    // Initialize UI elements to be empty/invisible.
+    [Header("Map Integration")]
+    // Reference to your map script that has the PlaceNewMarker function.
+    public Map mapManager;
+    // Reference to GetLocation script to access current latitude/longitude.
+    public GetLocation getLocationScript;
+
     void Start()
     {
         if (fishNameText != null)
@@ -84,12 +89,12 @@ public class FishCatcher : MonoBehaviour
             if (spriteToDisplay != null)
             {
                 fishImage.sprite = spriteToDisplay;
-                fishImage.enabled = true; // Ensure the image is visible.
+                fishImage.enabled = true;
             }
             else
             {
                 Debug.LogWarning("No sprite found for fish: " + caughtFish);
-                fishImage.enabled = false; // Optionally hide the image if not found.
+                fishImage.enabled = false;
             }
         }
         else
@@ -100,6 +105,29 @@ public class FishCatcher : MonoBehaviour
         // Remove the fish from the scene.
         Destroy(fish);
 
+        // Retrieve current latitude and longitude.
+        float lat, lon;
+        if (getLocationScript != null)
+        {
+            lat = getLocationScript.currentLatitude;
+            lon = getLocationScript.currentLongitude;
+        }
+        else
+        {
+            lat = Input.location.lastData.latitude;
+            lon = Input.location.lastData.longitude;
+        }
+
+        // Call the map script function to place a marker using the coordinates.
+        if (mapManager != null)
+        {
+            mapManager.PlaceNewMarker(lat, lon);
+        }
+        else
+        {
+            Debug.LogWarning("MapManager reference is not set.");
+        }
+
         // Start coroutine to clear the UI after 4 seconds.
         StartCoroutine(ClearUI());
     }
@@ -109,7 +137,6 @@ public class FishCatcher : MonoBehaviour
     {
         string[] selectedFishList;
 
-        // Choose the fish list based on the water type.
         if (currentWaterType.ToLower().Contains("pond"))
         {
             selectedFishList = pondFish;

@@ -14,12 +14,17 @@ public class SpawnMapping // to make the locations in the editor
 public class GetLocation : MonoBehaviour
 {
     public Transform player;                // Assign your player Transform in the Inspector
-    public SpawnMapping[] spawnMappings;    // Assign mappings in the Inspector
+    public SpawnMapping[] spawnMappings;      // Assign mappings in the Inspector
     public FishCatcher fishCatcher;         // Reference to the FishCatcher script
     float radius_threshold = 0.001f;         // Threshold for being "near" a water point
 
     public TMP_Text area_name_text;
     public TMP_Text location_warning_text;
+
+    [HideInInspector]
+    public float currentLatitude;
+    [HideInInspector]
+    public float currentLongitude;
 
     IEnumerator Start()
     {
@@ -59,10 +64,14 @@ public class GetLocation : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("Latitude: " + Input.location.lastData.latitude +
-                  ", Longitude: " + Input.location.lastData.longitude);
+        // Store the current location.
+        currentLatitude = Input.location.lastData.latitude;
+        currentLongitude = Input.location.lastData.longitude;
 
-        nearWater(Input.location.lastData.latitude, Input.location.lastData.longitude);
+        Debug.Log("Latitude: " + currentLatitude +
+                  ", Longitude: " + currentLongitude);
+
+        nearWater(currentLatitude, currentLongitude);
     }
 
     void nearWater(float latitude, float longitude)

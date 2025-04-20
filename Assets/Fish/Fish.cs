@@ -9,7 +9,8 @@ public class Fish : MonoBehaviour
     public float turnSpeed = 2f;
 
     private Vector3 swimDirection;
-    private Transform bobber; // Reference to the bobber
+
+    private Transform bobber;
     private bool isFishAttracted = false;
 
     void Start()
@@ -20,7 +21,7 @@ public class Fish : MonoBehaviour
 
     void Update()
     {
-        // Try to find the bobber if it hasn't been set yet.
+        // fish should be checking to see if the bobber is nearby at all times
         if (bobber == null)
         {
             FindBobber();
@@ -35,10 +36,11 @@ public class Fish : MonoBehaviour
             swimDirection = Vector3.Lerp(swimDirection, targetDirection, turnSpeed * Time.deltaTime);
         }
 
-        // Move the fish regardless of attraction state
+
+        // make fish move around in the water if there is no bobber in range
         transform.position += swimDirection * swimSpeed * Time.deltaTime;
 
-        // Rotate the fish to face its direction
+        // make fish face the way its swimming
         if (swimDirection != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(swimDirection, Vector3.up);
@@ -49,7 +51,7 @@ public class Fish : MonoBehaviour
 
     void SetNewSwimDirection()
     {
-        // Pick a random swim direction
+        // change direction randomly
         swimDirection = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
     }
 
@@ -62,13 +64,9 @@ public class Fish : MonoBehaviour
         }
     }
 
-    // Function to find the bobber in the scene if not already set
+    // as bobbers are prefabs and not already in the scene, attempt to find the bobber when its thrown in the scene
     void FindBobber()
     {
-        // Attempt to find the most recently placed bobber in the scene
         bobber = GameObject.FindWithTag("Bobber")?.transform;
-
-        // If you have a list of bobbers and want to pick the most recent one, you could iterate through them
-        // For now, we'll assume only one bobber exists in the scene
     }
 }

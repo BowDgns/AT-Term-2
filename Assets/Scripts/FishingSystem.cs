@@ -8,19 +8,18 @@ public class FishCatcher : MonoBehaviour
 {
     public float catchRange = 0.5f;
     public TMP_Text fishNameText;
-    public Image fishImage; // UI Image to display the fish sprite
+    public Image fishImage;
 
-    // Current water type that gets updated from GetLocation
-    [HideInInspector]
+    // location based on "getlocation"
     public string currentWaterType = "other";
 
-    // Fish lists for different water types
+    // fish lists for different water types
     public string[] pondFish = new string[] { "Goldfish", "Koi" };
     public string[] riverFish = new string[] { "Bass", "Trout" };
     public string[] seaFish = new string[] { "Mackerel", "Sea Bass" };
     public string[] otherFish = new string[] { "Catfish", "Carp" };
 
-    // Mapping of fish names to their sprites.
+    // mapping of fish names to their sprites.
     [System.Serializable]
     public class FishSpriteMapping
     {
@@ -29,10 +28,10 @@ public class FishCatcher : MonoBehaviour
     }
     public FishSpriteMapping[] fishSprites;
 
-    [Header("Map Integration")]
-    // Reference to your map script that has the PlaceNewMarker function.
+
     public Map mapManager;
-    // Reference to GetLocation script to access current latitude/longitude.
+
+    // get location coordinates
     public GetLocation getLocationScript;
 
     void Start()
@@ -47,7 +46,6 @@ public class FishCatcher : MonoBehaviour
         }
     }
 
-    // Called by PlayerController when a bobber exists and the player taps.
     public void TryCatchFishAtBobber(Transform bobberTransform)
     {
         if (bobberTransform == null)
@@ -56,7 +54,7 @@ public class FishCatcher : MonoBehaviour
             return;
         }
 
-        // Find all fish in the scene with the "Fish" tag.
+        // find fish in scene to ensure its a catchable object
         GameObject[] fishObjects = GameObject.FindGameObjectsWithTag("Fish");
         foreach (GameObject fish in fishObjects)
         {
@@ -64,7 +62,7 @@ public class FishCatcher : MonoBehaviour
             if (distance <= catchRange)
             {
                 CatchFish(fish);
-                break; // Only catch one fish per tap.
+                break; // only catch one fish per catch
             }
         }
     }
@@ -73,7 +71,6 @@ public class FishCatcher : MonoBehaviour
     {
         string caughtFish = GetRandomFishByWaterType();
 
-        // Display the fish name using TextMeshPro.
         if (fishNameText != null)
         {
             fishNameText.text = "Caught a " + caughtFish + "!";
@@ -83,7 +80,7 @@ public class FishCatcher : MonoBehaviour
             Debug.LogWarning("Fish Name TMP_Text reference is not set.");
         }
 
-        // Retrieve the sprite for the caught fish.
+        // get sprite for fish
         Sprite spriteToDisplay = GetSpriteForFish(caughtFish);
         if (fishImage != null)
         {
@@ -103,10 +100,10 @@ public class FishCatcher : MonoBehaviour
             Debug.LogWarning("Fish Image reference is not set.");
         }
 
-        // Remove the fish from the scene.
+        // remove fish shadow
         Destroy(fish);
 
-        // Retrieve current latitude and longitude.
+        // get lat long for mapping
         float lat, lon;
         if (getLocationScript != null)
         {
@@ -119,14 +116,11 @@ public class FishCatcher : MonoBehaviour
             lon = Input.location.lastData.longitude;
         }
 
-        // Call the map script function to place a marker using the coordinates.
-        // Assumes that PlaceNewMarker returns a FishMarker component.
         if (mapManager != null)
         {
             FishMarker marker = mapManager.PlaceNewMarker(lat, lon);
             if (marker != null)
             {
-                // Set marker data using the fish's name, sprite, and the current time.
                 marker.SetFishData(caughtFish, spriteToDisplay, DateTime.Now);
             }
         }
@@ -135,11 +129,9 @@ public class FishCatcher : MonoBehaviour
             Debug.LogWarning("MapManager reference is not set.");
         }
 
-        // Start coroutine to clear the UI after 4 seconds.
         StartCoroutine(ClearUI());
     }
 
-    // Selects a random fish name based on the current water type.
     string GetRandomFishByWaterType()
     {
         string[] selectedFishList;
@@ -165,7 +157,7 @@ public class FishCatcher : MonoBehaviour
         return selectedFishList[randomIndex];
     }
 
-    // Retrieves the sprite associated with the given fish name.
+    // get sprite from name
     Sprite GetSpriteForFish(string fishName)
     {
         foreach (FishSpriteMapping mapping in fishSprites)
@@ -178,7 +170,7 @@ public class FishCatcher : MonoBehaviour
         return null;
     }
 
-    // Coroutine to clear the UI elements after 4 seconds.
+    // clearing ui crountine
     IEnumerator ClearUI()
     {
         yield return new WaitForSeconds(4f);

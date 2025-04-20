@@ -13,17 +13,18 @@ public class SpawnMapping // to make the locations in the editor
 
 public class GetLocation : MonoBehaviour
 {
-    public Transform player;                // Assign your player Transform in the Inspector
-    public SpawnMapping[] spawnMappings;      // Assign mappings in the Inspector
-    public FishCatcher fishCatcher;         // Reference to the FishCatcher script
-    float radius_threshold = 0.001f;         // Threshold for being "near" a water point
+    public Transform player;                
+    public SpawnMapping[] spawnMappings;    // areas where player can spawn      
+
+    float radius_threshold = 0.001f;    // radius of being near water
+
+    public FishCatcher fishCatcher;
 
     public TMP_Text area_name_text;
     public TMP_Text location_warning_text;
 
-    [HideInInspector]
+    // map pinpointing 
     public float currentLatitude;
-    [HideInInspector]
     public float currentLongitude;
 
     IEnumerator Start()
@@ -36,7 +37,7 @@ public class GetLocation : MonoBehaviour
             yield return new WaitForSeconds(5);
         }
 
-        // Check if location is enabled
+        // check if location is enabled
         if (!Input.location.isEnabledByUser)
         {
             Debug.Log("Location not enabled");
@@ -56,7 +57,7 @@ public class GetLocation : MonoBehaviour
             maxWait--;
         }
 
-        // Check if location service is working
+        // check if location service is working
         if (Input.location.status == LocationServiceStatus.Failed)
         {
             Debug.Log("Unable to get location");
@@ -64,7 +65,7 @@ public class GetLocation : MonoBehaviour
             yield break;
         }
 
-        // Store the current location.
+        // store the current location.
         currentLatitude = Input.location.lastData.latitude;
         currentLongitude = Input.location.lastData.longitude;
 
@@ -74,20 +75,21 @@ public class GetLocation : MonoBehaviour
         nearWater(currentLatitude, currentLongitude);
     }
 
+    // check if player is within range of a water body
     void nearWater(float latitude, float longitude)
     {
         string path = Application.streamingAssetsPath + "/CityWater.csv";
 
-        // Read through coordinates in a CSV file and compare them to device coordinates
+        // compare against csv
         if (File.Exists(path))
         {
             string[] lines = File.ReadAllLines(path);
-            // Assuming the first line is a header
+            // ignore first line (header)
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i];
                 string[] parts = line.Split(',');
-                // Expected order: latitude, longitude, water body, water type, area type
+                // lat, long, water body, area type
                 double water_lat = double.Parse(parts[0]);
                 double water_lon = double.Parse(parts[1]);
                 string water_body = parts[2];
@@ -102,10 +104,11 @@ public class GetLocation : MonoBehaviour
             }
         }
         Debug.Log("Not near water");
+        // update player on screen
         location_warning_text.text = "Not near water, to play go near any water body!";
     }
 
-    // Simple check using Euclidean distance (for small distances)
+    // circle radius
     bool checkRadius(double lat1, double lon1, double lat2, double lon2)
     {
         double distance = Mathf.Sqrt(Mathf.Pow((float)(lat1 - lat2), 2) + Mathf.Pow((float)(lon1 - lon2), 2));
@@ -118,13 +121,14 @@ public class GetLocation : MonoBehaviour
         {
             if (mapping.waterType == waterType && mapping.areaType == areaType)
             {
-                Debug.Log("going to: " + mapping.spawnPoint.name);
+                Debug.Log("Area = " + mapping.spawnPoint.name);
+
                 if (player != null)
                 {
                     player.transform.position = mapping.spawnPoint.position;
                     area_name_text.text = "Area: " + mapping.areaType + ", " + mapping.waterType;
                 }
-                // Update the fish catcher with the current water type
+                // tell fish script what area the player is in to corelate to those fish
                 if (fishCatcher != null)
                 {
                     fishCatcher.currentWaterType = waterType;
@@ -132,6 +136,6 @@ public class GetLocation : MonoBehaviour
                 return;
             }
         }
-        Debug.Log("No spawn mapping found for Water Type: " + waterType + " and Area Type: " + areaType);
+        Debug.Log("no mapping for" + waterType + " / " + areaType);
     }
 }
